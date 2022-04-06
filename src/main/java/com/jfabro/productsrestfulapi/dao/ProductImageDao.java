@@ -16,6 +16,5 @@ public class ProductImageDao {
     private Long id;
     @Column(name = "image_url")
     private String imageUrl;
-
     private String sku;
 }

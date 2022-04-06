@@ -19,7 +19,6 @@ class ProductRepositoryTest {
     @Test
     public void save_method() {
         ProductDao product = new ProductDao();
-        product.setSku("1");
         product.setName("shoes");
         product.setBrand("adidas");
         product.setSize("11");
@@ -28,7 +27,6 @@ class ProductRepositoryTest {
 
         ProductDao savedProduct = productRepository.save(product);
 
-        assertEquals(savedProduct.getSku(), "1");
         assertEquals(savedProduct.getName(),"shoes");
         assertEquals(savedProduct.getBrand(), "adidas");
         assertEquals(savedProduct.getSize(), "11");
@@ -40,7 +38,6 @@ class ProductRepositoryTest {
     @Test
     public void get_product_by_id_and_found() {
         ProductDao product = new ProductDao();
-        product.setSku("1");
         product.setName("shoes");
         product.setBrand("adidas");
         product.setSize("11");
@@ -57,7 +54,6 @@ class ProductRepositoryTest {
     @Test
     public void get_product_by_id_and_not_found() {
         ProductDao product = new ProductDao();
-        product.setSku("1");
         product.setName("shoes");
         product.setBrand("adidas");
         product.setSize("11");
@@ -74,7 +70,6 @@ class ProductRepositoryTest {
     @Test
     public void get_all_products() {
         ProductDao product = new ProductDao();
-        product.setSku("1");
         product.setName("shoes");
         product.setBrand("adidas");
         product.setSize("11");
@@ -83,7 +78,6 @@ class ProductRepositoryTest {
         productRepository.save(product);
 
         ProductDao product2 = new ProductDao();
-        product2.setSku("2");
         product2.setName("jeans");
         product2.setBrand("levis");
         product2.setSize("l");
