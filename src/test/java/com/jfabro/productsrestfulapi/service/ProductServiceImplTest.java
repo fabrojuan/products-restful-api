@@ -4,6 +4,7 @@ import com.jfabro.productsrestfulapi.dao.ProductDao;
 import com.jfabro.productsrestfulapi.dto.ProductDto;
 import com.jfabro.productsrestfulapi.dto.ProductsDto;
 import com.jfabro.productsrestfulapi.exceptions.ProductNotFoundException;
+import com.jfabro.productsrestfulapi.repository.ProductImageRepository;
 import com.jfabro.productsrestfulapi.repository.ProductRepository;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +26,14 @@ class ProductServiceImplTest {
 
     @Mock
     ProductRepository productRepository;
+    @Mock
+    ProductImageRepository productImageRepository;
 
     ProductService productService;
 
     @BeforeEach
     public void setup() {
-        productService = new ProductServiceImpl(productRepository);
+        productService = new ProductServiceImpl(productRepository, productImageRepository);
     }
 
     @Test

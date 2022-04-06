@@ -5,19 +5,25 @@ import com.jfabro.productsrestfulapi.dao.ProductImageDao;
 import com.jfabro.productsrestfulapi.dto.ProductDto;
 import com.jfabro.productsrestfulapi.dto.ProductsDto;
 import com.jfabro.productsrestfulapi.exceptions.ProductNotFoundException;
+import com.jfabro.productsrestfulapi.repository.ProductImageRepository;
 import com.jfabro.productsrestfulapi.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService{
     @Autowired
-    private final ProductRepository repository;
+    private final ProductRepository productRepository;
+    @Autowired
+    private final ProductImageRepository imageRepository;
 
-    public ProductServiceImpl(ProductRepository repository) {
-        this.repository = repository;
+    public ProductServiceImpl(ProductRepository repository,
+                              ProductImageRepository productImageRepository) {
+        this.productRepository = repository;
+        this.imageRepository = productImageRepository;
     }
 
     @Override
@@ -26,7 +32,7 @@ public class ProductServiceImpl implements ProductService{
         ProductsDto productsDto = new ProductsDto();
         productsDto.setProducts(new ArrayList<>());
 
-        repository.findAll().forEach(p -> {
+        productRepository.findAll().forEach(p -> {
             ProductDto productDto = new ProductDto();
             // mejorar con algun mapper
             productDto.setSku(p.getSku());
@@ -34,6 +40,12 @@ public class ProductServiceImpl implements ProductService{
             productDto.setBrand(p.getBrand());
             productDto.setSize(p.getSize());
             productDto.setPrice(p.getPrice());
+
+            List<String> otherImageUrl = new ArrayList<>();
+            imageRepository.findBySku(p.getSku())
+                    .iterator().forEachRemaining(image -> otherImageUrl.add(image.getImageUrl()));
+            productDto.setOtherImagesUrl(otherImageUrl);
+
             productsDto.getProducts().add(productDto);
         });
 
@@ -42,7 +54,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductDto getProduct(String idProduct) {
-        ProductDao productDao = repository.findById(idProduct)
+        ProductDao productDao = productRepository.findById(idProduct)
                 .orElseThrow(() -> new ProductNotFoundException(idProduct));
 
         // mejorar con algun mapper
@@ -53,17 +65,22 @@ public class ProductServiceImpl implements ProductService{
         productDto.setSize(productDao.getSize());
         productDto.setPrice(productDao.getPrice());
 
+        List<String> otherImageUrl = new ArrayList<>();
+        imageRepository.findBySku(idProduct)
+                .iterator().forEachRemaining(image -> otherImageUrl.add(image.getImageUrl()));
+        productDto.setOtherImagesUrl(otherImageUrl);
+
         return productDto;
     }
 
     @Override
     public ProductDto saveProduct(ProductDto product) {
         ProductDao productDao = new ProductDao();
-        productDao.setSku(product.getSku());
         productDao.setName(product.getName());
         productDao.setBrand(product.getBrand());
         productDao.setSize(product.getSize());
         productDao.setPrice(product.getPrice());
+        productDao.setPrincipalImageUrl(product.getPrincipalImageUrl());
         productDao.setOtherImagesUrl(new ArrayList<ProductImageDao>());
 
         if (product.getOtherImagesUrl() != null
@@ -78,16 +95,33 @@ public class ProductServiceImpl implements ProductService{
                     });
         }
 
-        repository.save(productDao);
+        ProductDao savedProduct = productRepository.save(productDao);
+        product.setSku(savedProduct.getSku());
 
         return product;
     }
 
     @Override
+    public ProductDto updateProduct(String idProduct, ProductDto product) {
+        ProductDao productDao = productRepository.findById(idProduct)
+                .orElseThrow(() -> new ProductNotFoundException(idProduct));
+
+        productDao.setName(product.getName());
+        productDao.setBrand(product.getBrand());
+        productDao.setSize(product.getSize());
+        productDao.setPrice(product.getPrice());
+        productDao.setPrincipalImageUrl(product.getPrincipalImageUrl());
+
+        ProductDao savedProduct = productRepository.save(productDao);
+        product.setSku(savedProduct.getSku());
+        return product;
+    }
+
+    @Override
     public void deleteProduct(String idProduct) {
-        ProductDao product = repository
+        ProductDao product = productRepository
                 .findById(idProduct)
                 .orElseThrow(() -> new ProductNotFoundException(idProduct));
-        repository.delete(product);
+        productRepository.delete(product);
     }
 }

@@ -17,7 +17,5 @@ public class ProductImageDao {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @ManyToOne()
-    @JoinColumn(name = "sku")
-    private ProductDao product;
+    private String sku;
 }

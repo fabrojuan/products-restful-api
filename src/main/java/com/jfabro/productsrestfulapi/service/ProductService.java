@@ -8,5 +8,6 @@ public interface ProductService {
     ProductsDto getAllProducts();
     ProductDto getProduct(String idProduct);
     ProductDto saveProduct(ProductDto product);
+    ProductDto updateProduct(String idProduct, ProductDto product);
     void deleteProduct(String idProduct);
 }

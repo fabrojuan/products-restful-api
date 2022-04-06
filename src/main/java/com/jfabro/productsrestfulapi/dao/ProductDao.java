@@ -14,6 +14,7 @@ import java.util.List;
 public class ProductDao {
     @Id
     @Column(name = "sku")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String sku;
     @Column(name = "name")
     private String name;
@@ -26,6 +27,7 @@ public class ProductDao {
     @Column(name = "principal_image")
     private String principalImageUrl;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "sku")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImageDao> otherImagesUrl;
 }
