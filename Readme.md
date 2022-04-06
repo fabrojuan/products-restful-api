@@ -9,13 +9,16 @@ Run execute the below command "gradle bootRun"
 
 This project is structured in 3 layers
 
-Controller Layer
+***Controller Layer***
+
 Contains the class that exposes the endpoints
 
-Service Layer
+***Service Layer***
+
 Contains the class that contains the business logic
 
-Repository Layer
+***Repository Layer***
+
 Contains the classes that interact with the database. In this case, a H2 in memory database was used.
 
 
