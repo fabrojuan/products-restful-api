@@ -8,5 +8,4 @@ import java.util.List;
 
 public interface ProductImageRepository extends CrudRepository<ProductImageDao, Long> {
     Iterable<ProductImageDao> findBySku(String sku);
-
 }

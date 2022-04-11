@@ -7,8 +7,10 @@ import com.jfabro.productsrestfulapi.dto.ProductsDto;
 import com.jfabro.productsrestfulapi.exceptions.ProductNotFoundException;
 import com.jfabro.productsrestfulapi.repository.ProductImageRepository;
 import com.jfabro.productsrestfulapi.repository.ProductRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +22,12 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     private final ProductImageRepository imageRepository;
 
-    public ProductServiceImpl(ProductRepository repository,
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public ProductServiceImpl(ProductRepository productRepository,
                               ProductImageRepository productImageRepository) {
-        this.productRepository = repository;
+        this.productRepository = productRepository;
         this.imageRepository = productImageRepository;
     }
 
@@ -32,18 +37,13 @@ public class ProductServiceImpl implements ProductService{
         ProductsDto productsDto = new ProductsDto();
         productsDto.setProducts(new ArrayList<>());
 
-        productRepository.findAll().forEach(p -> {
-            ProductDto productDto = new ProductDto();
-            // mejorar con algun mapper
-            productDto.setSku(p.getSku());
-            productDto.setName(p.getName());
-            productDto.setBrand(p.getBrand());
-            productDto.setSize(p.getSize());
-            productDto.setPrice(p.getPrice());
+        productRepository.findAll().forEach(product -> {
+            ProductDto productDto = modelMapper.map(product, ProductDto.class);
 
             List<String> otherImageUrl = new ArrayList<>();
-            imageRepository.findBySku(p.getSku())
-                    .iterator().forEachRemaining(image -> otherImageUrl.add(image.getImageUrl()));
+            imageRepository.findBySku(product.getSku())
+                    .iterator()
+                    .forEachRemaining(image -> otherImageUrl.add(image.getImageUrl()));
             productDto.setOtherImagesUrl(otherImageUrl);
 
             productsDto.getProducts().add(productDto);
@@ -57,34 +57,23 @@ public class ProductServiceImpl implements ProductService{
         ProductDao productDao = productRepository.findById(idProduct)
                 .orElseThrow(() -> new ProductNotFoundException(idProduct));
 
-        // mejorar con algun mapper
-        ProductDto productDto = new ProductDto();
-        productDto.setSku(productDao.getSku());
-        productDto.setName(productDao.getName());
-        productDto.setBrand(productDao.getBrand());
-        productDto.setSize(productDao.getSize());
-        productDto.setPrice(productDao.getPrice());
+        ProductDto productDto = modelMapper.map(productDao, ProductDto.class);
 
-        List<String> otherImageUrl = new ArrayList<>();
+        List<String> otherImageUrls = new ArrayList<>();
         imageRepository.findBySku(idProduct)
-                .iterator().forEachRemaining(image -> otherImageUrl.add(image.getImageUrl()));
-        productDto.setOtherImagesUrl(otherImageUrl);
+                .iterator()
+                .forEachRemaining(image -> otherImageUrls.add(image.getImageUrl()));
+        productDto.setOtherImagesUrl(otherImageUrls);
 
         return productDto;
     }
 
     @Override
     public ProductDto saveProduct(ProductDto product) {
-        ProductDao productDao = new ProductDao();
-        productDao.setName(product.getName());
-        productDao.setBrand(product.getBrand());
-        productDao.setSize(product.getSize());
-        productDao.setPrice(product.getPrice());
-        productDao.setPrincipalImageUrl(product.getPrincipalImageUrl());
+        ProductDao productDao = modelMapper.map(product, ProductDao.class);
         productDao.setOtherImagesUrl(new ArrayList<ProductImageDao>());
 
-        if (product.getOtherImagesUrl() != null
-                && !product.getOtherImagesUrl().isEmpty()) {
+        if (!CollectionUtils.isEmpty(product.getOtherImagesUrl())) {
 
             product.getOtherImagesUrl()
                     .stream()

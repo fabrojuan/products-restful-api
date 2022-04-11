@@ -6,35 +6,28 @@ import com.jfabro.productsrestfulapi.dto.ProductsDto;
 import com.jfabro.productsrestfulapi.exceptions.ProductNotFoundException;
 import com.jfabro.productsrestfulapi.repository.ProductImageRepository;
 import com.jfabro.productsrestfulapi.repository.ProductRepository;
-import org.aspectj.lang.annotation.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class ProductServiceImplTest {
 
-    @Mock
+    @MockBean
     ProductRepository productRepository;
-    @Mock
+    @MockBean
     ProductImageRepository productImageRepository;
 
+    @Autowired
     ProductService productService;
-
-    @BeforeEach
-    public void setup() {
-        productService = new ProductServiceImpl(productRepository, productImageRepository);
-    }
 
     @Test
     void get_all_products() {
@@ -47,10 +40,12 @@ class ProductServiceImplTest {
         productDao.setPrincipalImageUrl("http://image1.img");
 
         when(productRepository.findAll()).thenReturn(Collections.singleton(productDao));
+        when(productImageRepository.findBySku(anyString())).thenReturn(Collections.emptyList());
         ProductsDto productsDto = productService.getAllProducts();
 
         assertNotNull(productsDto);
         assertEquals(productsDto.getProducts().size(), 1);
+        assertEquals(productsDto.getProducts().get(0).getOtherImagesUrl().size(), 0);
     }
 
     @Test
@@ -73,7 +68,11 @@ class ProductServiceImplTest {
     void get_one_product_and_not_found() {
         when(productRepository.findById("2")).thenReturn(java.util.Optional.ofNullable(null));
 
-        Exception exception = assertThrows(ProductNotFoundException.class, () -> {
+        //Exception exception = assertThrows(ProductNotFoundException.class, () -> {
+        //    productService.getProduct("2");
+        //});
+
+        assertThrows(ProductNotFoundException.class, () -> {
             productService.getProduct("2");
         });
     }
