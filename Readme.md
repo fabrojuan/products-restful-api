@@ -11,7 +11,7 @@ This project is structured in 3 layers
 
 ***Controller Layer***
 
-Contains the class that exposes the endpoints
+Contains the class that exposes the endpoints.
 
 ***Service Layer***
 
